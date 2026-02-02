@@ -21,6 +21,32 @@
             <option value="computer">Human vs Computer</option>
           </select>
         </label>
+        <label class="control">
+          AI difficulty
+          <select data-difficulty-select>
+            <option value="random">Random</option>
+            <option value="heuristic">Heuristic</option>
+            <option value="minimax">Minimax</option>
+          </select>
+        </label>
+        <label class="control">
+          Starting player
+          <select data-starting-player>
+            <option value="X">X starts</option>
+            <option value="O">O starts</option>
+          </select>
+        </label>
+        <label class="control">
+          Match type
+          <select data-match-type>
+            <option value="firstTo">First to N wins</option>
+            <option value="bestOf">Best of N</option>
+          </select>
+        </label>
+        <label class="control">
+          Match length
+          <input type="number" min="1" max="15" step="1" value="3" data-match-length />
+        </label>
         <div class="control-group">
           <button type="button" data-new-round>New round</button>
           <button type="button" data-reset-match>Reset match</button>
@@ -40,6 +66,11 @@
           <h2>Score</h2>
           <p>X: <span data-score-x>0</span></p>
           <p>O: <span data-score-o>0</span></p>
+        </div>
+        <div class="status-card">
+          <h2>Match status</h2>
+          <p data-match-target>-</p>
+          <p data-match-leader>-</p>
         </div>
       </section>
 

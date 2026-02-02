@@ -10,13 +10,18 @@ const WINNING_LINES = [
 ];
 
 export class GameState {
-  constructor({ startingPlayer = 'X' } = {}) {
+  constructor({ startingPlayer = 'X', matchType = 'firstTo', matchLength = 3 } = {}) {
     this.startingPlayer = startingPlayer;
+    this.matchType = matchType;
+    this.matchLength = matchLength;
     this.board = Array(9).fill(null);
     this.currentPlayer = startingPlayer;
     this.winner = null;
     this.isDraw = false;
     this.winningScore = { X: 0, O: 0 };
+    this.matchWinner = null;
+    this.winningLine = null;
+    this.lastMove = null;
   }
 
   resetBoard() {
@@ -24,15 +29,30 @@ export class GameState {
     this.currentPlayer = this.startingPlayer;
     this.winner = null;
     this.isDraw = false;
+    this.winningLine = null;
+    this.lastMove = null;
   }
 
   resetMatch() {
     this.resetBoard();
     this.winningScore = { X: 0, O: 0 };
+    this.matchWinner = null;
+  }
+
+  updateSettings({ startingPlayer, matchType, matchLength } = {}) {
+    if (startingPlayer) {
+      this.startingPlayer = startingPlayer;
+    }
+    if (matchType) {
+      this.matchType = matchType;
+    }
+    if (matchLength) {
+      this.matchLength = matchLength;
+    }
   }
 
   makeMove(index) {
-    if (this.winner || this.isDraw) {
+    if (this.winner || this.isDraw || this.matchWinner) {
       return false;
     }
 
@@ -41,15 +61,22 @@ export class GameState {
     }
 
     this.board[index] = this.currentPlayer;
+    this.lastMove = index;
 
-    if (this.checkWinner(this.currentPlayer)) {
+    const winningLine = this.getWinningLine(this.currentPlayer);
+    if (winningLine) {
       this.winner = this.currentPlayer;
+      this.winningLine = winningLine;
       this.winningScore[this.currentPlayer] += 1;
+      if (this.winningScore[this.currentPlayer] >= this.matchTarget) {
+        this.matchWinner = this.currentPlayer;
+      }
       return true;
     }
 
     if (this.board.every((cell) => cell)) {
       this.isDraw = true;
+      this.winner = null;
       return true;
     }
 
@@ -57,9 +84,21 @@ export class GameState {
     return true;
   }
 
-  checkWinner(player) {
-    return WINNING_LINES.some((line) =>
-      line.every((index) => this.board[index] === player),
+  get matchTarget() {
+    const safeLength = Number.isFinite(this.matchLength) && this.matchLength > 0
+      ? this.matchLength
+      : 1;
+    if (this.matchType === 'bestOf') {
+      return Math.ceil(safeLength / 2);
+    }
+    return safeLength;
+  }
+
+  getWinningLine(player) {
+    return (
+      WINNING_LINES.find((line) =>
+        line.every((index) => this.board[index] === player),
+      ) ?? null
     );
   }
 
